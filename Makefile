@@ -1,6 +1,6 @@
 dev : 
 	cargo fmt
-	cargo clippy
+	cargo clippy -- -D warnings
 	cargo test
 
 run : 
