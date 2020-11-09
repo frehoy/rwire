@@ -1,7 +1,8 @@
-use serde::Deserialize;
-use std::vec::Vec;
-
 use scraper::{Html, Selector};
+use serde::Deserialize;
+use std::io::{self, Write};
+use std::vec::Vec;
+use std::{thread, time};
 
 pub fn get_authors(document: &Html) -> String {
     //<meta name="author" content="Nailia Bagirova, Nvard Hovhannisyan"/>
@@ -95,19 +96,34 @@ async fn get_headlines() -> Result<Vec<Headline>, Box<dyn std::error::Error>> {
     Ok(resp.headlines)
 }
 
+impl<'a> Article<'a> {
+    fn to_text(&self) -> String {
+        let sep =
+            "\n\n################################################################################"
+                .to_string();
+        let joined_paragraphs = self.paragraphs.join("\n\n");
+        let text = vec![sep, self.headline.headline.clone(), joined_paragraphs].join("\n\n");
+        textwrap::fill(&text, 80)
+    }
+}
+
+fn ttype_print(article: &Article) {
+    let sleep_delay = time::Duration::from_millis(25);
+    let text = article.to_text();
+    for c in text.chars() {
+        print!("{}", c);
+        thread::sleep(sleep_delay);
+        io::stdout().flush().unwrap();
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let headlines = get_headlines().await.unwrap();
-    //println!("{:#?}", headlines);
-    println!("Got {:#?} headlines", headlines.len());
 
     for headline in headlines.iter() {
-        let text = headline.download_article().await;
-        //println!("{:?}", text);
-        let article = make_article(text, headline);
-        println!("######################################################################");
-        println!("{:?}", article.headline.headline);
-        println!("{:?}", article.paragraphs);
+        let article = make_article(headline.download_article().await, headline);
+        ttype_print(&article);
     }
 
     Ok(())
