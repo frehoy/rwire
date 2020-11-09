@@ -20,7 +20,7 @@ pub fn get_keywords(document: &Html) -> Vec<String> {
     let element_ref = selection.next().unwrap();
     let content = element_ref.value().attr("content").unwrap();
     let keywords = content
-        .split(",")
+        .split(',')
         .map(|keyword| keyword.to_string())
         .collect::<Vec<_>>();
     keywords
@@ -47,11 +47,10 @@ struct Article<'a> {
 fn make_article(raw_text: String, headline: &Headline) -> Article {
     let document = Html::parse_document(&raw_text);
     let paragraphs = get_paragraphs(&document);
-    let art = Article {
+    Article {
         headline,
         paragraphs,
-    };
-    art
+    }
 }
 
 #[allow(non_snake_case)]
@@ -78,15 +77,13 @@ impl Headline {
         // Build the URL by concatenating the base with the article ref
         let base = String::from("https://www.reuters.com");
         let ending = String::from(&self.url);
-        let url = base + &ending;
-        url
+        base + &ending
     }
 
     async fn download_article(&self) -> String {
         let url = self.build_url();
         //println!("Downloading {:#?}", url);
-        let text = reqwest::get(&url).await.unwrap().text().await.unwrap();
-        text
+        reqwest::get(&url).await.unwrap().text().await.unwrap()
     }
 }
 
