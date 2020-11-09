@@ -34,7 +34,7 @@ pub fn get_paragraphs(document: &Html) -> Vec<String> {
     let element_refs = document.select(&i_selector).collect::<Vec<_>>();
     let paragraphs: Vec<String> = element_refs
         .iter()
-        .map(|element_ref| element_ref.inner_html())
+        .map(|element_ref| element_ref.text().collect())
         .collect();
     paragraphs
 }
@@ -105,6 +105,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let text = headline.download_article().await;
         //println!("{:?}", text);
         let article = make_article(text, headline);
+        println!("######################################################################");
         println!("{:?}", article.headline.headline);
         println!("{:?}", article.paragraphs);
     }
